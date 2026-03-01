@@ -316,15 +316,21 @@ function initOnboarding() {
         btn.classList.add('active');
     });
 
-    // スリープゴール表示
+    // スリープゴール表示（30分刻み対応）
     const rangeEl = document.getElementById('sleep-goal');
     const dispEl = document.getElementById('sleep-goal-display');
-    rangeEl.addEventListener('input', () => { dispEl.textContent = rangeEl.value; });
+    function formatSleepGoal(val) {
+        const h = Math.floor(val);
+        const m = Math.round((val % 1) * 60);
+        return m > 0 ? `${h}時間${m}分` : `${h}時間`;
+    }
+    rangeEl.addEventListener('input', () => { dispEl.textContent = formatSleepGoal(parseFloat(rangeEl.value)); });
 
     // 保存済みプロフィールをフォームに反映
     if (profile) {
         document.getElementById('input-name').value = profile.name || '';
-        dispEl.textContent = rangeEl.value = profile.sleepGoal || 7;
+        dispEl.textContent = formatSleepGoal(parseFloat(profile.sleepGoal || 7));
+        rangeEl.value = profile.sleepGoal || 7;
         const roleBtn = document.querySelector(`[data-role="${profile.role || 'user'}"]`);
         if (roleBtn) {
             document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
@@ -344,7 +350,7 @@ function initOnboarding() {
             return;
         }
         const icon = document.querySelector('.icon-btn.active')?.dataset.icon || '🌙';
-        const sleepGoal = parseInt(document.getElementById('sleep-goal').value, 10);
+        const sleepGoal = parseFloat(document.getElementById('sleep-goal').value);
         state.profile = { name, icon, sleepGoal, role: state.role };
         saveProfile(state.profile);
         initScheduleSetup();
