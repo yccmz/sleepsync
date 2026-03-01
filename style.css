@@ -1,0 +1,1285 @@
+/* ============================================================
+   Sleep Sync — Design System CSS
+   design-rules.md に完全準拠
+   ============================================================ */
+
+/* --- CSS Variables --- */
+:root {
+  --bg-base: #0f1423;
+  --bg-app: rgba(19, 25, 43, 0.6);
+  --bg-card: rgba(30, 41, 59, 0.4);
+  --bg-card-strong: rgba(30, 41, 59, 0.8);
+  --bg-card-dim: rgba(30, 41, 59, 0.3);
+  --bg-overdue: rgba(76, 5, 25, 0.2);
+  --bg-goodnight: #050814;
+
+  --border-default: rgba(51, 65, 85, 0.5);
+  --border-overdue: rgba(136, 19, 55, 0.5);
+  --border-next: rgba(245, 158, 11, 0.3);
+  --border-indigo: rgba(99, 102, 241, 0.3);
+
+  --text-base: #e2e8f0;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --text-overdue: #ffe4e6;
+  --text-completed: #64748b;
+
+  --accent-amber: #f59e0b;
+  --accent-amber-2: #fbbf24;
+  --accent-amber-3: #fcd34d;
+  --accent-title-l: #fef3c7;
+  --accent-title-r: rgba(252, 211, 77, 0.7);
+  --accent-indigo: #4f46e5;
+  --accent-indigo-2: #6366f1;
+
+  --dot-completed: #475569;
+  --dot-overdue: #fb7185;
+  --dot-next: #fbbf24;
+  --dot-pending: #64748b;
+
+  --font-sans: 'Noto Sans JP', system-ui, sans-serif;
+  --font-serif: 'Noto Serif JP', Georgia, serif;
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-heavy: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+}
+
+/* --- Reset & Base --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg-base);
+  color: var(--text-base);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+button {
+  border: none;
+  cursor: pointer;
+  background: none;
+  font-family: inherit;
+}
+
+input {
+  font-family: inherit;
+}
+
+/* ============================================================
+   背景装飾レイヤー
+   ============================================================ */
+#bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.blob-indigo {
+  width: 384px;
+  height: 384px;
+  background: #4f46e5;
+  opacity: 0.10;
+  filter: blur(100px);
+  top: -80px;
+  left: -80px;
+}
+
+.blob-amber {
+  width: 320px;
+  height: 320px;
+  background: #f59e0b;
+  opacity: 0.05;
+  filter: blur(80px);
+  bottom: -60px;
+  right: -60px;
+}
+
+/* 星屑はJSで動的生成 */
+.star {
+  position: absolute;
+  background: #ffffff;
+  border-radius: 50%;
+  animation: twinkle var(--tw-dur, 3s) ease-in-out infinite;
+}
+
+@keyframes twinkle {
+
+  0%,
+  100% {
+    opacity: var(--tw-from, 0.3);
+  }
+
+  50% {
+    opacity: var(--tw-to, 0.6);
+  }
+}
+
+/* ============================================================
+   アプリコンテナ
+   ============================================================ */
+#app {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 448px;
+  height: 100dvh;
+  margin: 0 auto;
+  background: var(--bg-app);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-left: 1px solid rgba(30, 41, 59, 0.5);
+  border-right: 1px solid rgba(30, 41, 59, 0.5);
+  box-shadow: var(--shadow-heavy);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ============================================================
+   画面共通
+   ============================================================ */
+.screen {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.screen.active {
+  display: flex;
+}
+
+.screen-inner {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 40px 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* カード */
+.card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* フォームグループ */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.label-icon {
+  font-size: 14px;
+}
+
+.form-input {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-base);
+  padding: 12px 14px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+.form-input::placeholder {
+  color: var(--text-dim);
+}
+
+.form-time-input {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-base);
+  padding: 14px 16px;
+  font-size: 28px;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s;
+  text-align: center;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.form-time-input:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+/* time input color scheme fix for mobile */
+.form-time-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+  cursor: pointer;
+}
+
+.form-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.form-divider {
+  height: 1px;
+  background: var(--border-default);
+  margin: 4px 0;
+}
+
+/* 就寝時刻ラベルのサブヒント */
+.label-hint {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+/* 合計睡眠時間バッジ */
+.sleep-duration-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(79, 70, 229, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-full);
+  padding: 8px 16px;
+  margin-top: 4px;
+}
+
+.sleep-duration-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.sleep-duration-val {
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font-serif);
+  color: #c7d2fe;
+  letter-spacing: 0.04em;
+}
+
+.form-range {
+  width: 100%;
+  height: 4px;
+  accent-color: var(--accent-indigo-2);
+  cursor: pointer;
+}
+
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 0 2px;
+}
+
+/* プライマリボタン */
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-indigo), var(--accent-indigo-2));
+  color: #ffffff;
+  border-radius: var(--radius-full);
+  padding: 15px 24px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.2);
+}
+
+/* ============================================================
+   オンボーディング画面
+   ============================================================ */
+.onboarding-header {
+  text-align: center;
+  padding-bottom: 8px;
+}
+
+.logo-mark {
+  font-size: 48px;
+  margin-bottom: 8px;
+  display: block;
+  filter: drop-shadow(0 0 12px rgba(254, 243, 199, 0.4));
+}
+
+.onboarding-title {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  background: linear-gradient(90deg, var(--accent-title-l), var(--accent-title-r));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 6px;
+}
+
+.onboarding-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ロール選択 */
+.role-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.role-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid var(--border-default);
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.role-btn.active {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: var(--accent-indigo-2);
+  color: #c7d2fe;
+}
+
+/* アイコングリッド */
+.icon-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.icon-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  background: rgba(15, 23, 42, 0.5);
+  border: 2px solid transparent;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.icon-btn.active {
+  border-color: var(--accent-indigo-2);
+  background: rgba(99, 102, 241, 0.15);
+}
+
+/* ============================================================
+   セットアップ共通ヘッダー
+   ============================================================ */
+.setup-header {
+  padding-top: 8px;
+}
+
+.setup-title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--text-base);
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.setup-sub-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ============================================================
+   デトックス設定画面 — メッセージカード
+   ============================================================ */
+.detox-message-card {
+  background: rgba(30, 27, 75, 0.6);
+  border-color: var(--border-indigo);
+  box-shadow: 0 0 20px rgba(79, 70, 229, 0.1);
+  gap: 10px;
+}
+
+.detox-message-icon-text {
+  font-size: 20px;
+}
+
+.detox-message-body {
+  font-size: 13px;
+  color: #c7d2fe;
+  line-height: 1.8;
+}
+
+/* ============================================================
+   タイムライン画面
+   ============================================================ */
+
+/* ヘッダー */
+.timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.4);
+}
+
+
+
+.app-title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  background: linear-gradient(90deg, var(--accent-title-l), var(--accent-title-r));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.app-date {
+  font-family: var(--font-serif);
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.icon-btn-round {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: color 0.2s, background 0.2s;
+}
+
+.icon-btn-round:active {
+  background: rgba(30, 41, 59, 0.8);
+}
+
+/* サマリーカード */
+.summary-card {
+  margin: 12px 20px;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.summary-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
+
+.summary-time-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.summary-moon-icon {
+  font-size: 14px;
+}
+
+.my-color {
+  filter: sepia(1) saturate(3) hue-rotate(10deg);
+}
+
+/* #fde68a */
+.partner-color {
+  filter: brightness(0.85) saturate(0.3);
+}
+
+/* #cbd5e1 */
+
+.summary-time {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-base);
+  letter-spacing: 0.02em;
+}
+
+.summary-vdivider {
+  width: 1px;
+  height: 32px;
+  background: var(--border-default);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   タイムライン本体
+   ============================================================ */
+.timeline-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 0 40px;
+}
+
+/* 中央の時間軸線 */
+.timeline-axis {
+  position: relative;
+  padding: 0;
+}
+
+/* タイムライン行 */
+.tl-row {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  min-height: 64px;
+}
+
+/* 左右のカード列 */
+.tl-side {
+  flex: 0 0 45%;
+  padding: 6px 10px;
+}
+
+.tl-side.left {
+  text-align: right;
+  padding-right: 0;
+}
+
+.tl-side.right {
+  text-align: left;
+  padding-left: 0;
+}
+
+/* 中央列（ドット + 時刻） */
+.tl-center {
+  flex: 0 0 10%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10px;
+  position: relative;
+}
+
+/* 時間軸線 */
+.tl-center::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: -100%;
+  width: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, #1e293b, rgba(51, 65, 85, 0.5), transparent);
+  z-index: 0;
+}
+
+/* ドット */
+.tl-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  outline: 4px solid #13192b;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+
+.tl-dot.dot-completed {
+  background: var(--dot-completed);
+}
+
+.tl-dot.dot-overdue {
+  background: var(--dot-overdue);
+}
+
+.tl-dot.dot-next {
+  background: var(--dot-next);
+  box-shadow: 0 0 8px 2px rgba(251, 191, 36, 0.6);
+}
+
+.tl-dot.dot-pending {
+  background: var(--dot-pending);
+}
+
+/* 時刻ラベル */
+.tl-time {
+  font-size: 9px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   タスクカード
+   ============================================================ */
+.task-card {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 11px 13px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: rgba(30, 41, 59, 0.5);
+  text-align: left;
+  width: 100%;
+  transition: opacity 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+}
+
+/* 吹き出し角丸: 自分=右上2px, パートナー=左上2px */
+.tl-side.left .task-card {
+  border-top-right-radius: 2px;
+}
+
+.tl-side.right .task-card {
+  border-top-left-radius: 2px;
+}
+
+/* パートナーのカードは控えめに */
+.tl-side.right .task-card {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ステータス別スタイル */
+.task-card.status-next {
+  background: rgba(30, 41, 59, 0.85);
+  border-color: rgba(245, 158, 11, 0.35);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.2), 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.task-card.status-overdue {
+  background: var(--bg-overdue);
+  border-color: var(--border-overdue);
+}
+
+.task-card.status-completed {
+  background: var(--bg-card-dim);
+  border-color: rgba(51, 65, 85, 0.3);
+  opacity: 0.6;
+}
+
+/* テキスト色 */
+.task-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-base);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-overdue .task-name {
+  color: var(--text-overdue);
+}
+
+.status-completed .task-name {
+  color: var(--text-completed);
+  text-decoration: line-through;
+}
+
+.task-time-label {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* カウントダウンバッジ */
+.countdown-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--accent-amber-3);
+  border-radius: var(--radius-full);
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  animation: pulse-badge 2s ease-in-out infinite;
+  margin-top: 2px;
+  width: fit-content;
+}
+
+.countdown-badge.overdue {
+  background: rgba(251, 113, 133, 0.15);
+  color: #fda4af;
+}
+
+@keyframes pulse-badge {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.65;
+  }
+}
+
+/* チェックボタン */
+.task-check-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  align-self: flex-end;
+}
+
+.task-check-btn.checked {
+  background: var(--dot-completed);
+  border-color: var(--dot-completed);
+}
+
+.task-check-btn:hover:not(.checked) {
+  border-color: var(--accent-indigo-2);
+}
+
+.task-card-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+/* ============================================================
+   デジタルデトックスバナー
+   ============================================================ */
+.detox-row {
+  padding: 12px 20px;
+}
+
+.detox-banner {
+  width: 100%;
+  background: rgba(30, 27, 75, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 15px rgba(79, 70, 229, 0.15);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-direction: column;
+  text-align: center;
+}
+
+.detox-banner-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #c7d2fe;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detox-banner-sub {
+  font-size: 10px;
+  color: rgba(165, 180, 252, 0.8);
+}
+
+/* ============================================================
+   おやすみモード
+   ============================================================ */
+#screen-goodnight {
+  background: var(--bg-goodnight);
+  position: relative;
+}
+
+.back-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(30, 41, 59, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  z-index: 10;
+  transition: color 0.2s;
+}
+
+.back-button:hover {
+  color: var(--text-muted);
+}
+
+.goodnight-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px 24px;
+  position: relative;
+}
+
+/* 月の光 */
+.moon-glow {
+  position: absolute;
+  width: 256px;
+  height: 256px;
+  background: #fef3c7;
+  opacity: 0.05;
+  filter: blur(60px);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.goodnight-icon-wrap {
+  position: relative;
+  z-index: 1;
+}
+
+.moon-icon-svg {
+  color: rgba(254, 243, 199, 0.8);
+  filter: drop-shadow(0 0 15px rgba(254, 243, 199, 0.3));
+  animation: gentle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes gentle-pulse {
+
+  0%,
+  100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1.0;
+    transform: scale(1.04);
+  }
+}
+
+.goodnight-title {
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: 0.25em;
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.goodnight-sub {
+  font-size: 14px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.9;
+}
+
+.tomorrow-badge {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid #1e293b;
+  border-radius: var(--radius-full);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.tomorrow-label {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.tomorrow-time {
+  font-size: 16px;
+  font-weight: 700;
+  color: #cbd5e1;
+  font-family: var(--font-serif);
+}
+
+/* ============================================================
+   トースト通知
+   ============================================================ */
+.toast {
+  position: fixed;
+  bottom: 96px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  width: calc(100% - 48px);
+  max-width: 400px;
+  background: rgba(30, 41, 59, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-heavy);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.toast-star {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--accent-amber-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.toast-body {
+  flex: 1;
+}
+
+.toast-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-base);
+  margin-bottom: 2px;
+}
+
+.toast-msg {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.toast-close {
+  font-size: 16px;
+  color: var(--text-dim);
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+
+.toast-close:hover {
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   パートナー待機状態
+   ============================================================ */
+.partner-waiting {
+  opacity: 0.35;
+  text-align: center;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* ============================================================
+   タイムライン先頭・末尾の余白行
+   ============================================================ */
+.tl-spacer {
+  height: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.tl-spacer-line {
+  width: 1px;
+  background: linear-gradient(to bottom, #1e293b, transparent);
+  flex: 1;
+  max-width: 1px;
+}
+
+/* ============================================================
+   Lucide アイコン調整
+   ============================================================ */
+[data-lucide] {
+  display: inline-block;
+}
+
+/* ============================================================
+   スクロールバー非表示
+   ============================================================ */
+.screen-inner::-webkit-scrollbar,
+.timeline-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.screen-inner,
+.timeline-scroll {
+  scrollbar-width: none;
+}
+
+/* ============================================================
+   Safe Area (iPhone ノッチ対応)
+   ============================================================ */
+.screen-inner {
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
+}
+
+.timeline-scroll {
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.screen.active>* {
+  animation: fade-in-up 0.4s ease both;
+}
+
+/* ============================================================
+   ヘッダーアクションボタングループ
+   ============================================================ */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================================
+   デトックス設定 — スライダープレビュー
+   ============================================================ */
+.detox-time-preview {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.detox-time-preview span {
+  color: #c7d2fe;
+  font-weight: 700;
+}
+
+/* ============================================================
+   タスク編集画面
+   ============================================================ */
+.task-edit-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding: 16px;
+}
+
+.task-edit-name {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-default);
+  color: var(--text-base);
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  padding: 4px 0;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.task-edit-name:focus {
+  border-bottom-color: var(--accent-indigo-2);
+}
+
+.task-offset-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* タスク編集 — 時刻ピッカー行 */
+.task-edit-time-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.task-edit-time {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-base);
+  padding: 8px 12px;
+  font-size: 20px;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.2s;
+  text-align: center;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.task-edit-time:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+.task-edit-time::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+}
+
+.task-offset-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.task-offset-label .offset-num {
+  color: #c7d2fe;
+  font-weight: 700;
+}
+
+.task-offset-label .offset-time {
+  color: var(--text-dim);
+}
+
+/* タスク編集 — 就寝X分前ステッパー */
+.task-minutes-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.task-step-btn {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #c7d2fe;
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.task-step-btn:active {
+  background: rgba(99, 102, 241, 0.3);
+}
+
+.task-minutes-val {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: var(--font-serif);
+  color: #c7d2fe;
+  min-width: 40px;
+  text-align: center;
+}
+
+.btn-delete-task {
+  background: rgba(251, 113, 133, 0.1);
+  border: 1px solid rgba(251, 113, 133, 0.2);
+  color: #fda4af;
+  border-radius: var(--radius-sm);
+  padding: 4px 12px;
+  font-size: 11px;
+  cursor: pointer;
+  align-self: flex-end;
+  transition: background 0.2s;
+}
+
+.btn-delete-task:hover {
+  background: rgba(251, 113, 133, 0.2);
+}
+
+/* セカンダリボタン（アウトライン） */
+.btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #c7d2fe;
+  border-radius: var(--radius-full);
+  padding: 13px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.6);
+}

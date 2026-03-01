@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Sleep Sync">
+  <meta name="theme-color" content="#0f1423">
+  <meta name="description" content="ふたりの夜を、やさしく整える夜間ルーティン管理アプリ">
+  <title>Sleep Sync</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@300;400;500;700&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- 背景装飾レイヤー -->
+  <div id="bg-layer" aria-hidden="true">
+    <div class="blob blob-indigo"></div>
+    <div class="blob blob-amber"></div>
+    <div id="stars-container"></div>
+  </div>
+
+  <!-- アプリ本体 -->
+  <div id="app">
+
+    <!-- ===== オンボーディング画面 ===== -->
+    <section id="screen-onboarding" class="screen active">
+      <div class="screen-inner">
+        <div class="onboarding-header">
+          <div class="logo-mark">🌙</div>
+          <h1 class="onboarding-title">Sleep Sync</h1>
+          <p class="onboarding-sub">ふたりの夜を、やさしく整える</p>
+        </div>
+        <div class="card">
+          <div class="form-group">
+            <label class="form-label">あなたは？</label>
+            <div class="role-selector" id="role-selector">
+              <button class="role-btn active" data-role="user">私</button>
+              <button class="role-btn" data-role="partner">パートナー</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="input-name">お名前</label>
+            <input type="text" id="input-name" class="form-input" placeholder="水野" maxlength="10">
+          </div>
+          <div class="form-group">
+            <label class="form-label">アイコン</label>
+            <div class="icon-grid" id="icon-grid">
+              <button class="icon-btn active" data-icon="🌙">🌙</button>
+              <button class="icon-btn" data-icon="⭐">⭐</button>
+              <button class="icon-btn" data-icon="🌸">🌸</button>
+              <button class="icon-btn" data-icon="🍃">🍃</button>
+              <button class="icon-btn" data-icon="☁️">☁️</button>
+              <button class="icon-btn" data-icon="🦋">🦋</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">目標睡眠時間：<span id="sleep-goal-display">7</span>時間</label>
+            <input type="range" id="sleep-goal" class="form-range" min="6" max="9" value="7" step="1">
+            <div class="range-labels">
+              <span>6h</span><span>7h</span><span>8h</span><span>9h</span>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary" id="btn-onboarding-next">はじめる</button>
+      </div>
+    </section>
+
+    <!-- ===== スケジュール設定画面 ===== -->
+    <section id="screen-schedule" class="screen">
+      <div class="screen-inner">
+        <div class="setup-header">
+          <h2 class="setup-title">今夜の予定</h2>
+          <p class="setup-sub-text">明日の起床時間と今夜の就寝時間を設定してください</p>
+        </div>
+        <div class="card">
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">☀️</span>
+              明日の起床時刻
+            </label>
+            <input type="time" id="input-wake" class="form-time-input" value="07:00" step="300">
+          </div>
+          <div class="form-divider"></div>
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">🌙</span>
+              今夜の就寝時刻
+              <span class="label-hint">（目標から自動計算・手動変更可）</span>
+            </label>
+            <input type="time" id="input-bed" class="form-time-input" value="23:00" step="300">
+          </div>
+          <div class="sleep-duration-row">
+            <span class="sleep-duration-label">合計睡眠時間</span>
+            <span class="sleep-duration-val" id="sleep-duration-val">--</span>
+          </div>
+        </div>
+        <button class="btn-primary" id="btn-schedule-next">次へ →</button>
+      </div>
+    </section>
+
+    <!-- ===== デジタルデトックス設定画面 ===== -->
+    <section id="screen-detox" class="screen">
+      <div class="screen-inner">
+        <div class="setup-header">
+          <h2 class="setup-title">デジタルデトックス</h2>
+          <p class="setup-sub-text">画面を閉じる時間を決めましょう</p>
+        </div>
+        <div class="card detox-message-card">
+          <p class="detox-message-icon-text">💡</p>
+          <p id="detox-message-text" class="detox-message-body"></p>
+        </div>
+        <div class="card">
+          <div class="form-group">
+            <label class="form-label">
+              就寝 <strong id="detox-offset-val">120</strong> 分前からデジタルデトックス
+            </label>
+            <input type="range" id="slider-detox" class="form-range" min="30" max="180" value="120" step="30">
+            <div class="range-labels">
+              <span>30分前</span><span>3時間前</span>
+            </div>
+            <p class="detox-time-preview">開始時刻: <span id="detox-time-preview">--:--</span></p>
+          </div>
+        </div>
+        <button class="btn-primary" id="btn-detox-next">タイムラインへ →</button>
+      </div>
+    </section>
+
+    <!-- ===== タイムライン画面（メイン） ===== -->
+    <section id="screen-timeline" class="screen">
+
+      <!-- ヘッダー -->
+      <header class="timeline-header">
+        <div class="header-title-block">
+          <h1 class="app-title">Sleep Sync</h1>
+          <p class="app-date" id="app-date"></p>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn-round" id="btn-task-edit" aria-label="タスク編集">
+            <i data-lucide="list-plus" width="20" height="20"></i>
+          </button>
+          <button class="icon-btn-round" id="btn-settings" aria-label="設定">
+            <i data-lucide="settings" width="20" height="20"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- サマリーカード -->
+      <div class="summary-card" id="summary-card">
+        <div class="summary-col">
+          <span class="summary-label" id="my-label">私</span>
+          <div class="summary-time-row">
+            <span class="summary-moon-icon my-color">🌙</span>
+            <span class="summary-time" id="my-bed-time">--:--</span>
+          </div>
+        </div>
+        <div class="summary-vdivider"></div>
+        <div class="summary-col">
+          <span class="summary-label" id="partner-label">パートナー</span>
+          <div class="summary-time-row">
+            <span class="summary-moon-icon partner-color">🌙</span>
+            <span class="summary-time" id="partner-bed-time">--:--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- タイムライン本体 -->
+      <div class="timeline-scroll" id="timeline-container">
+        <!-- JS で動的生成 -->
+      </div>
+
+    </section>
+
+    <!-- ===== タスク編集画面 ===== -->
+    <section id="screen-tasks" class="screen">
+      <div class="screen-inner">
+        <div class="setup-header">
+          <h2 class="setup-title">タスク編集</h2>
+          <p class="setup-sub-text">タスク名と就寝何分前かを変更できます</p>
+        </div>
+        <div id="task-edit-list">
+          <!-- JS で動的生成 -->
+        </div>
+        <button class="btn-secondary" id="btn-add-task">＋ タスクを追加</button>
+        <button class="btn-primary" id="btn-tasks-done">完了</button>
+      </div>
+    </section>
+
+    <!-- ===== おやすみモード ===== -->
+    <section id="screen-goodnight" class="screen">
+      <button class="back-button" id="btn-goodnight-back" aria-label="戻る">
+        <i data-lucide="x" width="18" height="18"></i>
+      </button>
+      <div class="goodnight-inner">
+        <div class="moon-glow"></div>
+        <div class="goodnight-icon-wrap">
+          <i data-lucide="cloud-moon" width="80" height="80" stroke-width="1" class="moon-icon-svg"></i>
+        </div>
+        <h2 class="goodnight-title">おやすみなさい</h2>
+        <p class="goodnight-sub">今日も一日、おつかれさまでした。<br>ゆっくり休んでね。</p>
+        <div class="tomorrow-badge">
+          <span class="tomorrow-label">明日の起床</span>
+          <span class="tomorrow-time" id="tomorrow-wake">--:--</span>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /#app -->
+
+  <!-- トースト通知 -->
+  <div id="toast" class="toast" role="alert" aria-live="polite">
+    <div class="toast-star">
+      <i data-lucide="star" width="14" height="14"></i>
+    </div>
+    <div class="toast-body">
+      <p class="toast-title" id="toast-title"></p>
+      <p class="toast-msg" id="toast-msg"></p>
+    </div>
+    <button class="toast-close" id="toast-close" aria-label="閉じる">✕</button>
+  </div>
+
+  <!-- Firebase compat CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <!-- App -->
+  <script src="app.js?v=6"></script>
+</body>
+
+</html>
