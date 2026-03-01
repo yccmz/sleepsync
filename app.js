@@ -275,6 +275,10 @@ function listenPartner() {
                     sendNotification(`${partnerName}が予定を設定しました`, 'あなたも今夜の予定を設定しましょう');
                 }
             }
+            // isFirstLoad でもタイムライン表示中なら即再描画（Firebase キャッシュからの即時返答に対応）
+            if (document.getElementById('screen-timeline').classList.contains('active')) {
+                renderTimeline();
+            }
         }
 
         // タイムライン表示中なら即座に再描画（両ユーザーのタイムラインを反映）
@@ -533,6 +537,14 @@ function initTimeline() {
     };
 
     renderTimeline();
+    // Firebase の非同期応答に備えて遅延再描画（初回描画後にパートナーデータが届く場合の保険）
+    [500, 1500, 3000].forEach(delay => {
+        setTimeout(() => {
+            if (document.getElementById('screen-timeline').classList.contains('active')) {
+                renderTimeline();
+            }
+        }, delay);
+    });
 }
 
 function renderTimeline() {
