@@ -11,13 +11,13 @@
 // にある値をここにコピー&ペーストしてください。
 // ============================================================
 const FIREBASE_CONFIG = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyCBAZ1iUYiqUe-_W9ar6KEjAw9F1kZ0u2w",
+    authDomain: "sleep-sync-18b36.firebaseapp.com",
+    databaseURL: "https://sleep-sync-18b36-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "sleep-sync-18b36",
+    storageBucket: "sleep-sync-18b36.firebasestorage.app",
+    messagingSenderId: "994531492392",
+    appId: "1:994531492392:web:dae9f8cd4e895566786b1d"
 };
 
 // 夫婦固定ルームID（変更不要）
