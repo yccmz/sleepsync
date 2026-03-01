@@ -243,11 +243,10 @@ function pushMyData() {
 function listenPartner() {
     if (!state.firebaseDb) return;
     const partnerRole = state.role === 'user' ? 'partner' : 'user';
-    let lastUpdatedAt = null; // 前回の更新時刻（初回ロードとの区別用）
+    let lastUpdatedAt = null;
 
     state.firebaseDb.ref(`rooms/${ROOM_ID}/${partnerRole}`).on('value', snapshot => {
         const data = snapshot.val();
-        const prevData = state.partnerData;
         state.partnerData = data;
 
         // パートナーが新たに予定を設定・更新したらトースト通知
@@ -256,16 +255,29 @@ function listenPartner() {
             lastUpdatedAt = data.updatedAt;
 
             if (!isFirstLoad) {
-                // 既存セッション中に更新された → 通知
                 const partnerName = data.profile?.name || 'パートナー';
-                showToast(`${partnerName}が今夜の予定を設定しました！`, '✨');
-                sendNotification(`${partnerName}が予定を設定しました`, '今夜のタイムラインを確認しましょう');
-            } else {
-                // 初回ロード時は lastUpdatedAt だけ更新（トーストなし）
+
+                if (state.schedule) {
+                    // 自分のスケジュールがある → タイムラインを表示して両方のタイムラインを見せる
+                    showToast(`${partnerName}が今夜の予定を設定しました！`, 'タイムラインを確認しましょう 👀');
+                    sendNotification(`${partnerName}が予定を設定しました`, '今夜のタイムラインを確認しましょう');
+                    // タイムライン画面でなければ自動遷移
+                    if (!document.getElementById('screen-timeline').classList.contains('active')) {
+                        initTimeline();
+                        showScreen('timeline');
+                        startCountdown();
+                    } else {
+                        renderTimeline();
+                    }
+                } else {
+                    // 自分の予定がまだ → 予定設定を促す
+                    showToast(`${partnerName}が今夜の予定を設定しました！`, 'あなたも今夜の予定を設定しましょう');
+                    sendNotification(`${partnerName}が予定を設定しました`, 'あなたも今夜の予定を設定しましょう');
+                }
             }
         }
 
-        // タイムライン表示中なら即座に再描画
+        // タイムライン表示中なら即座に再描画（両ユーザーのタイムラインを反映）
         if (document.getElementById('screen-timeline').classList.contains('active')) {
             renderTimeline();
         }
