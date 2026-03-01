@@ -353,9 +353,18 @@ function initOnboarding() {
         const sleepGoal = parseFloat(document.getElementById('sleep-goal').value);
         state.profile = { name, icon, sleepGoal, role: state.role };
         saveProfile(state.profile);
-        initScheduleSetup();
-        initDetoxSetup();
-        showScreen('schedule');
+        if (state._editingProfile) {
+            // 編集モード：タイムラインに直接戻る
+            state._editingProfile = false;
+            initTimeline();
+            showScreen('timeline');
+            startCountdown();
+        } else {
+            // 初回登録：スケジュール設定へ
+            initScheduleSetup();
+            initDetoxSetup();
+            showScreen('schedule');
+        }
     });
 }
 
@@ -474,6 +483,14 @@ function initTimeline() {
     document.getElementById('btn-settings').onclick = () => {
         initScheduleSetup();
         showScreen('schedule');
+        stopCountdown();
+    };
+
+    // プロフィール編集ボタン
+    document.getElementById('btn-profile-edit').onclick = () => {
+        state._editingProfile = true;
+        initOnboarding();
+        showScreen('onboarding');
         stopCountdown();
     };
 
