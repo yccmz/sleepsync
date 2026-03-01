@@ -213,7 +213,7 @@ function getStatus(task, tasks) {
 // ============================================================
 function initFirebase() {
     if (!FIREBASE_READY) {
-        console.warn('[SleepSync] Firebase未設定のため、パートナー同期は無効です。app.js の FIREBASE_CONFIG を設定してください。');
+        console.warn('[SleepSync] Firebase未設定');
         return;
     }
     try {
@@ -225,18 +225,30 @@ function initFirebase() {
         console.log('[SleepSync] Firebase接続成功');
     } catch (e) {
         console.error('[SleepSync] Firebase初期化エラー:', e);
+        // 画面が表示された後にトーストで通知
+        setTimeout(() => showToast('Firebase接続エラー', e.message || '詳細はコンソールを確認'), 2000);
     }
 }
 
 /** 自分のデータを Firebase に書き込む */
 function pushMyData() {
-    if (!state.firebaseDb || !state.profile || !state.schedule) return;
+    if (!state.firebaseDb) {
+        console.warn('[SleepSync] Firebase未初期化 - データを書き込めません');
+        showToast('Firebase未接続', 'ページを再読み込みしてください');
+        return;
+    }
+    if (!state.profile || !state.schedule) return;
     const myPath = `rooms/${ROOM_ID}/${state.role}`;
     state.firebaseDb.ref(myPath).set({
         profile: state.profile,
         schedule: state.schedule,
         updatedAt: Date.now()
-    }).catch(e => console.error('[SleepSync] Firebase書き込みエラー:', e));
+    })
+        .then(() => console.log('[SleepSync] Firebase書き込み成功:', myPath))
+        .catch(e => {
+            console.error('[SleepSync] Firebase書き込みエラー:', e);
+            showToast('Firebase書き込みエラー', e.message || 'パートナー同期に失敗しました');
+        });
 }
 
 /** パートナーのデータをリアルタイムで購読 */
