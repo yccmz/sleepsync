@@ -243,9 +243,28 @@ function pushMyData() {
 function listenPartner() {
     if (!state.firebaseDb) return;
     const partnerRole = state.role === 'user' ? 'partner' : 'user';
+    let lastUpdatedAt = null; // 前回の更新時刻（初回ロードとの区別用）
+
     state.firebaseDb.ref(`rooms/${ROOM_ID}/${partnerRole}`).on('value', snapshot => {
         const data = snapshot.val();
+        const prevData = state.partnerData;
         state.partnerData = data;
+
+        // パートナーが新たに予定を設定・更新したらトースト通知
+        if (data && data.updatedAt && data.updatedAt !== lastUpdatedAt) {
+            const isFirstLoad = lastUpdatedAt === null;
+            lastUpdatedAt = data.updatedAt;
+
+            if (!isFirstLoad) {
+                // 既存セッション中に更新された → 通知
+                const partnerName = data.profile?.name || 'パートナー';
+                showToast(`${partnerName}が今夜の予定を設定しました！`, '✨');
+                sendNotification(`${partnerName}が予定を設定しました`, '今夜のタイムラインを確認しましょう');
+            } else {
+                // 初回ロード時は lastUpdatedAt だけ更新（トーストなし）
+            }
+        }
+
         // タイムライン表示中なら即座に再描画
         if (document.getElementById('screen-timeline').classList.contains('active')) {
             renderTimeline();
@@ -909,7 +928,6 @@ function hideToast() {
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
     generateStars();
-    initFirebase();
 
     // トースト閉じるボタン
     document.getElementById('toast-close').addEventListener('click', hideToast);
@@ -921,6 +939,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const profile = loadProfile();
     const schedule = loadSchedule();
     const goodnight = loadGoodnight();
+
+    // ★ initFirebase より先に state.role を確定させる（listenPartner が正しいノードを監視するため）
+    if (profile) {
+        state.profile = profile;
+        state.role = profile.role || 'user';
+    }
+
+    // Firebase 初期化（role が確定した後）
+    initFirebase();
 
     if (!profile) {
         // 初回: オンボーディング
